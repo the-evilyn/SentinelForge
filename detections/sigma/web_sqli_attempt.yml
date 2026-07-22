@@ -1,0 +1,36 @@
+title: SQL Injection Attempt in Web Access Log
+id: 9a8b7c6d-5e4f-4321-b0a9-8c7d6e5f4a3b
+status: experimental
+description: >
+  Detects common SQL injection probe patterns in Nginx/Apache access logs
+  (UNION SELECT, boolean tautologies, time-based payloads). Tuned for the lab's
+  vulnerable target; expect tuning against real apps.
+references:
+  - https://owasp.org/www-community/attacks/SQL_Injection
+  - https://attack.mitre.org/techniques/T1190/
+author: Cedric Severin DJIGUIMDE (CedricCloudOps)
+date: 2026-06-25
+logsource:
+  category: webserver
+detection:
+  selection:
+    c-uri-query|contains:
+      - 'union select'
+      - 'UNION SELECT'
+      - "' or '1'='1"
+      - 'or 1=1'
+      - 'sleep('
+      - 'benchmark('
+      - 'information_schema'
+  condition: selection
+fields:
+  - src_ip
+  - c-uri-query
+  - cs-user-agent
+falsepositives:
+  - Security scanners run by the blue team itself
+  - Applications that legitimately accept SQL-like search strings
+level: medium
+tags:
+  - attack.initial-access
+  - attack.t1190

@@ -1,0 +1,64 @@
+# soc-detection-lab — self-contained blue-team lab.
+#
+#   * wazuh.manager  : the SIEM/HIDS brain (analysis, custom rules, alerts.json)
+#   * suricata       : network IDS watching the lab bridge, writing eve.json
+#   * dvwa           : a deliberately vulnerable web app = the "victim" target
+#
+# This is a LAB. Never expose it to the internet. Default creds are weak on
+# purpose. See README.md for the full bring-up + cert notes for the optional
+# indexer/dashboard.
+
+name: soc-detection-lab
+
+services:
+  wazuh.manager:
+    image: wazuh/wazuh-manager:4.9.0
+    hostname: wazuh-manager
+    restart: unless-stopped
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 655360, hard: 655360 }
+    ports:
+      - "1514:1514" # agent connection (TCP)
+      - "1515:1515" # agent enrollment
+      - "55000:55000" # Wazuh REST API
+    volumes:
+      - wazuh_etc:/var/ossec/etc
+      - wazuh_logs:/var/ossec/logs
+      - ./config/wazuh/local_rules.xml:/var/ossec/etc/rules/local_rules.xml:ro
+      - ./config/wazuh/local_decoder.xml:/var/ossec/etc/decoders/local_decoder.xml:ro
+      - suricata_logs:/var/log/suricata:ro # so the manager can ingest eve.json
+    healthcheck:
+      test: ["CMD", "/var/ossec/bin/wazuh-control", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  suricata:
+    image: jasonish/suricata:7.0
+    hostname: suricata
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: "service:dvwa" # share the target's netns to see its traffic
+    command: ["-i", "eth0", "-S", "/etc/suricata/rules/custom.rules"]
+    volumes:
+      - ./config/suricata/custom.rules:/etc/suricata/rules/custom.rules:ro
+      - suricata_logs:/var/log/suricata
+    depends_on:
+      - dvwa
+
+  dvwa:
+    image: vulnerables/web-dvwa:latest
+    hostname: dvwa
+    restart: unless-stopped
+    ports:
+      - "8080:80" # http://localhost:8080  (login admin/password)
+    environment:
+      - MYSQL_PASS=${DVWA_DB_PASSWORD:-changeme}
+
+volumes:
+  wazuh_etc:
+  wazuh_logs:
+  suricata_logs:

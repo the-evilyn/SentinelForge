@@ -1,0 +1,59 @@
+<!--
+  Custom Wazuh rules for soc-detection-lab.
+  IDs in the 100000+ range are reserved for user rules and won't clash with the
+  shipped ruleset. These complement the Sigma rules in detections/sigma/ by
+  doing the stateful correlation Sigma can't express on its own.
+-->
+<group name="local,soc-lab,">
+
+  <!-- Escalate Wazuh's built-in sshd failure (5710/5712) into a brute-force
+       alert when the same source IP trips it repeatedly in a short window. -->
+  <rule id="100100" level="12" frequency="8" timeframe="120">
+    <if_matched_sid>5710</if_matched_sid>
+    <same_source_ip />
+    <description>SSH brute force: 8+ failed logins from $(srcip) in 120s</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>authentication_failures,brute_force,</group>
+  </rule>
+
+  <!-- A successful SSH login from an IP that was brute-forcing = likely
+       compromise. This is the high-value correlation a SOC actually pages on. -->
+  <rule id="100101" level="14">
+    <if_sid>5715</if_sid>
+    <if_matched_sid>100100</if_matched_sid>
+    <same_source_ip />
+    <description>Possible SSH compromise: successful login from brute-forcing IP $(srcip)</description>
+    <mitre>
+      <id>T1110.001</id>
+      <id>T1078</id>
+    </mitre>
+    <group>authentication_success,brute_force,</group>
+  </rule>
+
+  <!-- Remote payload pattern: download piped straight into a shell. Relies on
+       command/audit log collection on the endpoint. -->
+  <rule id="100110" level="12">
+    <decoded_as>auditd</decoded_as>
+    <field name="audit.execve">.*(curl|wget).*\|.*sh.*</field>
+    <description>Download piped to shell detected (curl/wget | sh) on $(host)</description>
+    <mitre>
+      <id>T1059.004</id>
+      <id>T1105</id>
+    </mitre>
+    <group>execution,malware_download,</group>
+  </rule>
+
+  <!-- SQL injection probe seen in the web access log decoder. -->
+  <rule id="100120" level="10">
+    <if_group>web|accesslog</if_group>
+    <url type="pcre2">(?i)(union\s+select|or\s+1=1|information_schema|sleep\(|benchmark\()</url>
+    <description>SQL injection attempt against web app from $(srcip)</description>
+    <mitre>
+      <id>T1190</id>
+    </mitre>
+    <group>attack,web,sql_injection,</group>
+  </rule>
+
+</group>

@@ -1,0 +1,31 @@
+title: SSH Brute Force - Multiple Authentication Failures
+id: 6f3e1d54-9b2a-4c77-8c2e-1a2b3c4d5e6f
+status: stable
+description: >
+  Detects repeated SSH authentication failures from a single source, a classic
+  brute-force / password-spray precursor. Pairs with Wazuh rule 5712.
+references:
+  - https://attack.mitre.org/techniques/T1110/
+author: Cedric Severin DJIGUIMDE (CedricCloudOps)
+date: 2026-06-25
+logsource:
+  product: linux
+  service: sshd
+detection:
+  selection:
+    message|contains:
+      - 'Failed password for'
+      - 'authentication failure'
+  timeframe: 120s
+  condition: selection | count() by src_ip >= 8
+fields:
+  - src_ip
+  - user
+  - host
+falsepositives:
+  - Misconfigured automation or backup jobs using stale credentials
+  - Users repeatedly fat-fingering passwords (rare at this volume)
+level: high
+tags:
+  - attack.credential-access
+  - attack.t1110.001

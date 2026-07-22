@@ -1,0 +1,35 @@
+title: Suspicious Download Piped to Shell (curl/wget | sh)
+id: 1c9b8a7d-6e5f-4a3b-9c2d-0e1f2a3b4c5d
+status: experimental
+description: >
+  Detects the "curl ... | sh" / "wget ... | bash" pattern frequently used to
+  fetch and execute a remote payload in a single command. High signal on
+  servers; noisier on developer workstations.
+references:
+  - https://attack.mitre.org/techniques/T1059/004/
+  - https://attack.mitre.org/techniques/T1105/
+author: Cedric Severin DJIGUIMDE (CedricCloudOps)
+date: 2026-06-25
+logsource:
+  product: linux
+  category: process_creation
+detection:
+  downloader:
+    CommandLine|contains:
+      - 'curl '
+      - 'wget '
+  piped_shell:
+    CommandLine|re: '\|\s*(sudo\s+)?(ba|z|da)?sh\b'
+  condition: downloader and piped_shell
+fields:
+  - CommandLine
+  - User
+  - host
+falsepositives:
+  - Legitimate installer scripts (rvm, nvm, oh-my-zsh) run by developers
+  - Provisioning automation that bootstraps tooling this way
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.004
+  - attack.t1105

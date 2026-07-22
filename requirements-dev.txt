@@ -1,0 +1,4 @@
+# Dev/test tooling only — alert_forwarder.py itself uses the standard library.
+pytest>=8.0
+ruff>=0.6
+PyYAML>=6.0

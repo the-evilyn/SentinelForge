@@ -1,0 +1,16 @@
+<!--
+  Custom Wazuh decoders for soc-detection-lab.
+  Wazuh ships decoders for Nginx/Apache already; this file is the place to add
+  app-specific parsing. Below is a minimal example that extracts the source IP
+  and requested URL from a simple combined-style access log so rule 100120
+  (SQL injection) has the fields it needs.
+-->
+<decoder name="lab-web-access">
+  <prematch>^\d+\.\d+\.\d+\.\d+ </prematch>
+</decoder>
+
+<decoder name="lab-web-access-fields">
+  <parent>lab-web-access</parent>
+  <regex>^(\d+.\d+.\d+.\d+) \S+ \S+ \[\S+ \S+\] "\w+ (\S+) </regex>
+  <order>srcip,url</order>
+</decoder>
