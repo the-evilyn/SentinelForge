@@ -1,7 +1,7 @@
 # SentinelForge — Detection Engineering & Rule Specification Guide
 
-> **Author & Lead Engineer:** Evilyn (Final-Year Cybersecurity Engineering, ENSI Tanger)  
-> **Platform:** SentinelForge Detection & Correlation Engine  
+> **Author & Lead Engineer:** Evilyn (Final-Year Cybersecurity Engineering, ENSI Tanger)<br>
+> **Platform:** SentinelForge — Security Detection & Incident Response Platform<br>
 > **Document Version:** 1.0 (October 2026)
 
 ---

@@ -1,8 +1,8 @@
-# SentinelForge — SOC Detection & Incident Response Platform
+# SentinelForge — Security Detection & Incident Response Platform
 
 > **A modular, defensive cybersecurity platform integrating multi-source security telemetry, stateful correlation, explainable risk scoring, and automated NIST-aligned incident reporting.**
 
-[![CI](https://github.com/the-evilyn/SOC-Detection-Lab/actions/workflows/ci.yml/badge.svg)](https://github.com/the-evilyn/SOC-Detection-Lab/actions/workflows/ci.yml)
+[![CI](https://github.com/the-evilyn/SentinelForge/actions/workflows/ci.yml/badge.svg)](https://github.com/the-evilyn/SentinelForge/actions/workflows/ci.yml)
 ![Tests: 85 passing](https://img.shields.io/badge/tests-85%20passing-brightgreen)
 ![Python: 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -13,7 +13,9 @@
 
 ## 1. Project Overview
 
-**SentinelForge** (developed on the foundation of [CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab)) is a defensive cybersecurity engineering and detection platform.
+**SentinelForge** is a modular, defensive Security Operations Center (SOC) detection engineering, event correlation, and incident response platform.
+
+Designed and developed by **Evilyn** (Final-Year Cybersecurity Engineering, ENSI Tanger), SentinelForge addresses alert fatigue and fragmented telemetry in modern blue-team operations. It introduces an independent, schema-enforced detection and correlation pipeline capable of processing multi-source telemetry both in containerized lab environments and completely offline.
 
 In modern Security Operations Centers (SOCs), isolated alert notifications from SIEMs or NIDS sensors generate alert fatigue and lack contextual progression. SentinelForge solves this by providing:
 
@@ -104,8 +106,8 @@ flowchart TD
 ### 1. Installation
 ```bash
 # Clone the repository
-git clone https://github.com/the-evilyn/SOC-Detection-Lab.git
-cd SOC-Detection-Lab
+git clone https://github.com/the-evilyn/SentinelForge.git
+cd SentinelForge
 
 # Optional: Set up virtual environment
 python3 -m venv venv
@@ -190,18 +192,20 @@ The laboratory stack includes deliberately vulnerable targets for defensive eval
 
 ## 7. Documentation Index
 
-- [Architecture & Data Flow Guide](docs/ARCHITECTURE.md)
+- [Architecture & Data Flow Guide](docs/architecture.md)
 - [Detection Engineering & Rule Specification](docs/DETECTION_ENGINE.md)
 - [Threat Model & Security Posture](docs/THREAT_MODEL.md)
 - [Project Audit & Baseline Analysis](docs/PROJECT_AUDIT.md)
 - [Engineering Roadmap & Acceptance Criteria](docs/ROADMAP.md)
+- [Credits & Attribution](CREDITS.md)
 - [SSH Incident Response Playbook](playbooks/ir-ssh-bruteforce.md)
 - [Web Attack Incident Response Playbook](playbooks/ir-web-attack.md)
 
 ---
 
-## 8. Attribution & License
+## 8. Attribution & Provenance
 
-- **SentinelForge Additions & Architecture:** © 2026 Evilyn (the-evilyn). Developed as a capstone cybersecurity engineering project at ENSI Tanger.
-- **Original Educational Lab Foundation:** © 2026 Cedric Severin DJIGUIMDE ([CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab)).
+- **SentinelForge Core Architecture & Engine:** © 2026 Evilyn (the-evilyn). Authored independently as an advanced cybersecurity engineering portfolio project at ENSI Tanger, comprising the typed data models, modular ingestion parsers, canonical normalizer, detection engine, stateful correlator, transparent risk scorer, deduplication engine, offline replay CLI, and automated test suite.
+- **Upstream Educational Lab Baseline:** The containerized demonstration lab environment (Docker stack, initial DVWA/Wazuh/Suricata configuration, and alert forwarder script) is derived from [CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab) © 2026 Cedric Severin DJIGUIMDE.
+- **Component Provenance Details:** A full component-by-component provenance audit distinguishing original additions from upstream baseline files is documented in [CREDITS.md](CREDITS.md).
 - **License:** Released under the [MIT License](LICENSE).

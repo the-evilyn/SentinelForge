@@ -102,7 +102,7 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sentinelforge",
-        description="SentinelForge — SOC Detection & Incident Response Engine",
+        description="SentinelForge — Security Detection & Incident Response Platform",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 

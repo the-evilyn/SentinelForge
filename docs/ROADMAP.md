@@ -1,9 +1,8 @@
 # SentinelForge — Technical Roadmap & Engineering Specification
 
-> **Platform:** SentinelForge — Advanced SOC Detection & Incident Response Platform  
-> **Author & Lead Engineer:** Evilyn (Final-Year Cybersecurity Engineering, ENSI Tanger)  
-> **Foundation:** Extended from [CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab)  
-> **Repository:** [the-evilyn/SOC-Detection-Lab](https://github.com/the-evilyn/SOC-Detection-Lab)  
+> **Platform:** SentinelForge — Security Detection & Incident Response Platform<br>
+> **Author & Lead Architect:** Evilyn (Final-Year Cybersecurity Engineering, ENSI Tanger)<br>
+> **Repository:** [the-evilyn/SentinelForge](https://github.com/the-evilyn/SentinelForge)<br>
 > **Document Version:** 1.0 (October 2026)
 
 ---
@@ -32,7 +31,7 @@ A rigorous audit of the current repository against the target vision confirms th
 
 | Area | Current State in Repository | Target State in SentinelForge | Technical Gap & Required Work |
 |:---|:---|:---|:---|
-| **Git & Remotes** | `origin` -> `the-evilyn/SOC-Detection-Lab`<br>`upstream` -> `CedricCloudOps/soc-detection-lab`<br>Clean history preserved (1 commit). | Maintained cleanly with signed, well-structured commits once approved. | Configuration verified; no code pushed. |
+| **Git & Remotes** | `origin` -> `the-evilyn/SentinelForge`<br>`upstream` -> `CedricCloudOps/soc-detection-lab`<br>Clean history preserved (1 commit). | Maintained cleanly with signed, well-structured commits once approved. | Configuration verified; no code pushed. |
 | **Test Baseline** | 56 tests passing (16 alert forwarder + 5 fixtures + 35 models). 3 Sigma rules valid. | Comprehensive unit, integration, boundary, and offline replay test suite (>120 tests). | Need tests for ingestion, normalization, detection, correlation, suppression, and reporting. |
 | **Network Exposure** | `docker-compose.yml` binds `8080`, `1514`, `1515`, `55000` to `0.0.0.0` (all host interfaces). | All container ports bound strictly to `127.0.0.1` (localhost). | Vulnerable DVWA and Wazuh API exposed on untrusted networks; requires immediate localhost restriction. |
 | **Lab SSH Target** | `scripts/simulate-attack.sh` connects to `baduser@localhost:22`, but no container runs SSH on port 22. | Explicit synthetic SSH fixtures for offline testing + dedicated lab SSH container or target config. | Live script fails with connection refused or inadvertently hits host SSH; offline fixtures now in place. |
@@ -99,7 +98,7 @@ flowchart TD
 ## 4. Proposed Directory Structure
 
 ```text
-SOC-Detection-Lab/
+SentinelForge/
 ├── .env.example                     # Environment template (DVWA credentials, optional webhook/API keys)
 ├── .github/
 │   └── workflows/

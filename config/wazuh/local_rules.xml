@@ -1,5 +1,5 @@
 <!--
-  Custom Wazuh rules for soc-detection-lab.
+  Custom Wazuh rules for SentinelForge.
   IDs in the 100000+ range are reserved for user rules and won't clash with the
   shipped ruleset. These complement the Sigma rules in detections/sigma/ by
   doing the stateful correlation Sigma can't express on its own.

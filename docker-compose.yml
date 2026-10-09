@@ -1,4 +1,4 @@
-# soc-detection-lab — self-contained blue-team lab.
+# SentinelForge (extended from soc-detection-lab) — self-contained blue-team lab.
 #
 #   * wazuh.manager  : the SIEM/HIDS brain (analysis, custom rules, alerts.json)
 #   * suricata       : network IDS watching the lab bridge, writing eve.json
@@ -8,7 +8,7 @@
 # purpose. See README.md for the full bring-up + cert notes for the optional
 # indexer/dashboard.
 
-name: soc-detection-lab
+name: sentinelforge
 
 services:
   wazuh.manager:

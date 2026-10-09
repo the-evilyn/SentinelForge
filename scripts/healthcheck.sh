@@ -14,7 +14,7 @@ check() {
   fi
 }
 
-echo "soc-detection-lab health check"
+echo "SentinelForge health check"
 check "docker compose services up" "docker compose ps --status running | grep -q wazuh"
 check "Wazuh manager process"      "docker compose exec -T wazuh.manager /var/ossec/bin/wazuh-control status"
 check "DVWA target reachable"      "curl -fsS http://localhost:8080 -o /dev/null"

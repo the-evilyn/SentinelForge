@@ -1,96 +1,101 @@
-# SOC Detection Lab 🛰️
+# SentinelForge — Plateforme de Détection de Sécurité & Réponse à Incident 🛡️
 
-> Un **lab blue-team autonome basé sur Docker** : Wazuh (SIEM/HIDS) + Suricata
-> (IDS réseau) + une cible volontairement vulnérable, livré avec du **contenu de
-> détection personnalisé**, des **playbooks de réponse à incident alignés NIST**
-> et un **forwarder d'alertes testé**. On le démarre, on l'attaque sans risque,
-> et on voit les détections se déclencher de bout en bout.
+> **Une plateforme modulaire de cybersécurité défensive intégrant l'ingestion de télémétrie multi-sources, la corrélation d'événements à fenêtre glissante, un scoring de risque transparent et la génération automatisée de rapports d'incident conformes au NIST.**
 
-🇬🇧 **English version → [README.md](README.md)**
+🇬🇧 **Documentation anglaise principale → [README.md](README.md)** | **Détails de provenance & attribution → [CREDITS.md](CREDITS.md)**
 
-![Architecture](docs/diagrams/architecture.png)
+[![Tests: 85 passing](https://img.shields.io/badge/tests-85%20passing-brightgreen)](tests)
+[![Python: 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-Enterprise-red)](docs/DETECTION_ENGINE.md)
 
 ---
 
-## Pourquoi ce projet
+## 1. Présentation du Projet
 
-N'importe qui sait installer un SIEM. Ce qu'un employeur (ou une équipe sécurité
-d'ONG) veut vraiment voir, c'est si vous savez **écrire des détections, mener une
-investigation et répondre**. Ce lab en est la preuve : détection-as-code
-portable, vraies règles de corrélation, et runbooks directement utilisables —
-le tout reproductible avec un seul `docker compose up`.
+**SentinelForge** est une plateforme défensive d'ingénierie de détection et de réponse à incident pour Security Operations Center (SOC), conçue et développée par **Evilyn** (étudiante en dernière année d'ingénierie cybersécurité à l'ENSI Tanger).
 
-## Contenu
+Dans les centres opérationnels de sécurité modernes, l'accumulation d'alertes isolées provenant de SIEMs ou d'IDS réseau engendre une fatigue informationnelle (*alert fatigue*) et masque la progression chronologique des cyberattaques. SentinelForge résout cette problématique en fournissant :
 
-| Couche | Techno | Points clés |
-|--------|--------|-------------|
-| **SIEM / HIDS** | Wazuh 4.9 | Règles de corrélation (`config/wazuh/local_rules.xml`) : escalade brute-force SSH, règle de *compromission après brute-force*, exécution `curl\|sh`, SQLi web |
-| **IDS réseau** | Suricata 7.0 | Règles locales (`config/suricata/custom.rules`) : scan de ports, brute-force SSH, SQLi, traversée de répertoire, téléchargements suspects |
-| **Détection-as-code** | Sigma | Règles portables dans `detections/sigma/` + validateur exécuté en CI |
-| **Automatisation** | Python (stdlib) | `tools/alert_forwarder.py` envoie les alertes critiques vers Slack/Teams — **16 tests, 0 dépendance** |
-| **Réponse** | Markdown | Playbooks NIST SP 800-61 dans `playbooks/` |
-| **Simulation** | Bash | `scripts/simulate-attack.sh` génère une télémétrie sûre, en local uniquement |
+1. **Ingestion & Normalisation Découplée :** Conversion des journaux d'authentification Linux, des logs d'accès Apache, des événements réseau Suricata EVE et des alertes Wazuh en événements typés et horodatés en UTC strict (ISO-8601).
+2. **Moteur de Détection Déterministe :** Exécution de règles basées sur des motifs syntaxiques et des seuils statistiques alignées sur le framework MITRE ATT&CK.
+3. **Corrélation d'Événements à Fenêtre Glissante :** Détection de séquences d'attaque multi-étapes (ex. tentative répétée de brute-force SSH suivie immédiatement d'une authentification réussie avec compte valide).
+4. **Scoring de Risque Multi-Facteurs Transparent :** Calcul mathématique explicable combinant sévérité de base, confiance de la règle, fréquence logarithmique et escalade de compromission.
+5. **Gestion des Faux Positifs & Déduplication :** Suppression des tempêtes d'alertes identiques et gestion d'allowlists contextuelles (ex. vérifications de supervision locale).
+6. **Replay & Benchmark Hors-Ligne Autonome :** Un exécuteur CLI (`sentinelforge`) permettant d'évaluer la précision, le rappel et le taux de faux positifs sur des jeux de données étiquetés, sans nécessiter Docker.
 
-## Architecture
+---
+
+## 2. Architecture Globale du Système
 
 ```mermaid
-flowchart LR
-    attacker[["simulate-attack.sh\n(sûr, local)"]]
-    subgraph lab["Réseau Docker (isolé)"]
-        dvwa["Cible DVWA\n:8080"]
-        suricata["Suricata IDS\neve.json"]
-        wazuh["Wazuh Manager\nrègles + alerts.json"]
+flowchart TD
+    subgraph IngestionNormalization["Couche d'Ingestion & Normalisation"]
+        sources["Sources de Télémétrie\n(Linux auth.log, Apache access, Suricata eve.json, Wazuh)"] --> parsers["Parseurs Résilients\n(BaseParser, Auth, Apache, EVE, Wazuh)"]
+        parsers --> norm["EventNormalizer\n(Horodatage UTC ISO-8601, EventType Enums)"]
     end
-    fwd["alert_forwarder.py"]
-    chat[["Slack / Teams"]]
 
-    attacker -->|SQLi, brute force,\ntraversée| dvwa
-    dvwa -. trafic mirroré .-> suricata
-    suricata -->|eve.json| wazuh
-    dvwa -->|logs hôte + web| wazuh
-    wazuh -->|alertes critiques\nalerts.json| fwd --> chat
+    subgraph CoreEngine["Moteur Central SentinelForge"]
+        norm --> det["Moteur de Détection\n(Règles à seuil & motifs)"]
+        det --> corr["Corrélateur Temporel\n(Fenêtres glissantes, escalade de compromission)"]
+        det --> dedup["Déduplicateur\n(Fenêtres de suppression, allowlists)"]
+        corr --> scorer["Calculateur de Risque\n(Formule multi-facteurs transparente)"]
+        corr --> mitre["Matrice MITRE ATT&CK\n(Couverture et techniques)"]
+    end
+
+    subgraph OperationsDFIR["Opérations, DFIR & Restitution"]
+        scorer --> rep["Générateur de Rapports\n(Empreinte SHA-256 de preuve forensique)"]
+        mitre --> rep
+        rep --> cli["CLI d'Évaluation & Replay\n(Métriques : Précision, Rappel, FPR)"]
+        rep --> playbooks["Playbooks NIST SP 800-61r2\n(Endiguement & Éradication)"]
+    end
 ```
 
-## Démarrage rapide
+---
 
-**Prérequis :** Docker + Docker Compose, ~4 Go de RAM.
+## 3. Démarrage Rapide
 
+### Prérequis
+- Python 3.9+ (testé sous Python 3.12 et 3.14)
+- Docker & Docker Compose (optionnel, requis uniquement pour le lab conteneurisé)
+
+### Exécution Hors-Ligne (Replay de Télémétrie)
 ```bash
-cp .env.example .env
-docker compose up -d
-./scripts/healthcheck.sh
-./scripts/simulate-attack.sh
-docker compose exec wazuh.manager cat /var/ossec/logs/alerts/alerts.json > alerts.json
-python tools/alert_forwarder.py --alerts alerts.json --min-level 8 --dry-run
+# Replay d'événements d'authentification SSH
+python3 tools/sentinelforge_cli.py replay --file tests/fixtures/ssh_auth.log --format linux_auth
+
+# Replay de logs d'accès web Apache
+python3 tools/sentinelforge_cli.py replay --file tests/fixtures/apache_access.log --format apache_combined
 ```
 
-> DVWA : <http://localhost:8080> (`admin` / `password`). API Wazuh sur `55000`.
-
-## Couverture de détection (MITRE ATT&CK)
-
-| Technique | ID | Détection |
-|-----------|----|-----------|
-| Brute Force : Password Guessing | T1110.001 | Wazuh 100100 / Suricata 1000002 / Sigma |
-| Comptes valides (après brute-force) | T1078 | Wazuh 100101 (corrélation) |
-| Shell Unix | T1059.004 | Wazuh 100110 / Sigma |
-| Transfert d'outil (download) | T1105 | Sigma + Suricata 1000005 |
-| Exploitation d'appli publique (SQLi) | T1190 | Wazuh 100120 / Suricata 1000003 / Sigma |
-
-## Tests & qualité
-
+### Évaluation des Métriques de Détection (Benchmark)
 ```bash
-pip install -r requirements-dev.txt
-ruff check tools tests scripts
-pytest                              # 16 tests
-python scripts/validate_sigma.py
+python3 tools/sentinelforge_cli.py benchmark --scenarios tests/fixtures/synthetic_events.json
 ```
 
-## ⚠️ Sécurité
+### Exécution de la Suite de Tests
+```bash
+python3 -m pytest -v          # 85 tests validés
+python3 scripts/validate_sigma.py
+```
 
-Ce lab exécute **volontairement** des logiciels vulnérables avec des identifiants
-faibles. Gardez-le sur un hôte/réseau isolé, ne l'exposez jamais à Internet, et
-n'utilisez `simulate-attack.sh` que contre la cible fournie.
+---
 
-## Licence
+## 4. Documentation Technique
 
-MIT © 2026 Cedric Severin DJIGUIMDE — voir [LICENSE](LICENSE).
+- [Architecture Système & Flux de Données](docs/architecture.md)
+- [Guide d'Ingénierie de Détection & Spécification des Règles](docs/DETECTION_ENGINE.md)
+- [Modèle de Menaces & Posture de Sécurité](docs/THREAT_MODEL.md)
+- [Feuille de Route Technique](docs/ROADMAP.md)
+- [Provenance & Crédits des Composants](CREDITS.md)
+- [Playbook Réponse Incident : Brute-Force SSH](playbooks/ir-ssh-bruteforce.md)
+- [Playbook Réponse Incident : Attaque Web](playbooks/ir-web-attack.md)
+
+---
+
+## 5. Attribution & Provenance
+
+- **Moteur & Architecture SentinelForge :** © 2026 Evilyn (the-evilyn). Projet développé de manière indépendante (modèles de données, moteur d'ingestion/normalisation/détection/corrélation/scoring, CLI et suite de 85 tests).
+- **Socle du Lab Éducatif Conteneurisé :** Dérivé de l'environnement Docker initial créé par Cedric Severin DJIGUIMDE ([CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab)) © 2026.
+- **Détails Complets :** Voir [CREDITS.md](CREDITS.md).
+- **Licence :** Distribué sous licence [MIT](LICENSE).

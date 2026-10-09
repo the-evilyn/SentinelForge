@@ -1,8 +1,8 @@
 # SOC Detection Lab — Comprehensive Repository Audit & Safe Configuration Review
 
-> **Audit Date:** October 2026  
-> **Audited Repository:** [CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab)  
-> **Target Fork / Portfolio Destination:** [the-evilyn/SOC-Detection-Lab](https://github.com/the-evilyn/SOC-Detection-Lab.git)  
+> **Audit Date:** October 2026<br>
+> **Audited Repository:** [CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab)<br>
+> **Target Fork / Portfolio Destination:** [the-evilyn/SentinelForge](https://github.com/the-evilyn/SentinelForge.git)<br>
 > **Status:** Grounded inspection completed. Clean working tree, no running containers, no secrets detected.
 
 ---
@@ -221,8 +221,8 @@ flowchart TD
 
 1. **Git Remote Setup:**
    - Current Git remote `origin` points to `https://github.com/CedricCloudOps/soc-detection-lab`.
-   - The user's target repository is `https://github.com/the-evilyn/SOC-Detection-Lab.git`.
-   - A clear configuration step is needed to preserve upstream attribution (`git remote rename origin upstream` and `git remote add origin https://github.com/the-evilyn/SOC-Detection-Lab.git`).
+   - The user's target repository is `https://github.com/the-evilyn/SentinelForge.git`.
+   - A clear configuration step is needed to preserve upstream attribution (`git remote rename origin upstream` and `git remote add origin https://github.com/the-evilyn/SentinelForge.git`).
 2. **Missing Custom Engine Documentation:**
    - No architectural documentation exists for a standalone Python detection/correlation engine that can run without Docker or Wazuh.
 3. **No Synthetic Telemetry Fixtures:**

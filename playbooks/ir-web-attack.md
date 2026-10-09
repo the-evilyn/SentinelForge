@@ -1,7 +1,6 @@
 # IR Playbook — Web Application Attack (SQL Injection)
 
-**Trigger:** Wazuh rule `100120` (SQLi pattern in web access log) or Suricata
-`sid:1000003`. MITRE: **T1190** (Exploit Public-Facing Application).
+**Trigger:** SentinelForge rule `DET-WEB-001` (SQL Injection) / `DET-WEB-002` (Path Traversal), Wazuh rule `100120`, or Suricata `sid:1000003`. MITRE: **T1190** (Exploit Public-Facing Application).
 
 > Aligned with NIST SP 800-61r2 and OWASP guidance.
 

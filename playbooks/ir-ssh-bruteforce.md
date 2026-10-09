@@ -1,7 +1,6 @@
 # IR Playbook — SSH Brute Force / Credential Access
 
-**Trigger:** Wazuh rule `100100` (8+ SSH failures from one IP / 120s) or escalation
-to `100101` (successful login from a brute-forcing IP). MITRE: **T1110.001**, **T1078**.
+**Trigger:** SentinelForge rule `DET-SSH-001` / `CORR-SSH-002` (SSH brute force & compromise escalation), or Wazuh rule `100100` / `100101`. MITRE: **T1110.001**, **T1078**.
 
 > Aligned with NIST SP 800-61r2 (Detection → Containment → Eradication → Recovery
 > → Post-incident).

@@ -117,7 +117,7 @@ def format_slack_message(alert: Alert) -> dict:
                 "title": f"[{alert.severity.upper()}] {alert.description}",
                 "ts": alert.timestamp,
                 "fields": fields,
-                "footer": "soc-detection-lab • Wazuh",
+                "footer": "SentinelForge • Wazuh",
             }
         ]
     }

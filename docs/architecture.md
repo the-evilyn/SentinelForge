@@ -1,9 +1,8 @@
 # SentinelForge — System Architecture & Data Flow
 
-> **Platform:** SentinelForge — Advanced SOC Detection & Incident Response Platform<br>
-> **Author & Lead Engineer:** Evilyn (Final-Year Cybersecurity Engineering, ENSI Tanger)<br>
-> **Foundation:** Extended from [CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab)
-> **Repository:** [the-evilyn/SOC-Detection-Lab](https://github.com/the-evilyn/SOC-Detection-Lab)
+> **Platform:** SentinelForge — Security Detection & Incident Response Platform<br>
+> **Author & Lead Architect:** Evilyn (Final-Year Cybersecurity Engineering, ENSI Tanger)<br>
+> **Repository:** [the-evilyn/SentinelForge](https://github.com/the-evilyn/SentinelForge)
 
 ---
 
@@ -113,3 +112,9 @@ flowchart TD
 - **`IncidentReporter`:** Outputs deterministic JSON and Markdown reports.
 - **Evidence Integrity:** Computes a SHA-256 digest over concatenated raw logs in chronological sequence, establishing forensic evidence verification.
 - **NIST Alignment:** Generates containment, eradication, and recovery recommendations aligned with NIST SP 800-61r2.
+
+---
+
+## 4. Provenance & Decoupled Architecture
+
+SentinelForge was architected from the ground up as an independent defensive engineering platform. While it maintains telemetry interoperability with containerized lab environments (such as [CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab)), the entire core pipeline (`engine/models`, `engine/ingestion`, `engine/normalization`, `engine/detection`, `engine/correlation`, `engine/scoring`, `engine/suppression`, `engine/mitre`, `engine/reporting`, `engine/evaluation`, and `tools/sentinelforge_cli.py`) is an original standalone implementation that operates deterministically without external container or SIEM dependencies. Complete component provenance details are documented in [CREDITS.md](../CREDITS.md).

@@ -1,5 +1,5 @@
 <!--
-  Custom Wazuh decoders for soc-detection-lab.
+  Custom Wazuh decoders for SentinelForge.
   Wazuh ships decoders for Nginx/Apache already; this file is the place to add
   app-specific parsing. Below is a minimal example that extracts the source IP
   and requested URL from a simple combined-style access log so rule 100120
