@@ -1,68 +1,115 @@
-# Architecture & detection design
+# SentinelForge — System Architecture & Data Flow
 
-## Components
+> **Platform:** SentinelForge — Advanced SOC Detection & Incident Response Platform<br>
+> **Author & Lead Engineer:** Evilyn (Final-Year Cybersecurity Engineering, ENSI Tanger)<br>
+> **Foundation:** Extended from [CedricCloudOps/soc-detection-lab](https://github.com/CedricCloudOps/soc-detection-lab)
+> **Repository:** [the-evilyn/SOC-Detection-Lab](https://github.com/the-evilyn/SOC-Detection-Lab)
 
-| Service | Image | Role |
-|---------|-------|------|
-| `wazuh.manager` | `wazuh/wazuh-manager:4.9.0` | Log analysis, decoders, rules, `alerts.json`, REST API |
-| `suricata` | `jasonish/suricata:7.0` | Network IDS; shares the target's netns, writes `eve.json` |
-| `dvwa` | `vulnerables/web-dvwa` | The intentionally vulnerable "victim" web app |
+---
 
-The Wazuh **indexer** and **dashboard** are intentionally left out of the default
-compose to keep the lab light and avoid the TLS bootstrap. To add them, generate
-certs with the official `wazuh-certs-tool.sh`, mount them, and add the two
-services — notes below.
+## 1. System Overview
 
-## Data flow
+SentinelForge is a modular defensive security platform designed to bridge the gap between raw, heterogeneous security telemetry and actionable incident response. It complements SIEM and NIDS tools (such as Wazuh and Suricata) by providing:
 
-1. `simulate-attack.sh` (or a real adversary) hits the DVWA target.
-2. **Suricata** sees the packets on the shared interface and writes signatures
-   matches to `/var/log/suricata/eve.json`.
-3. The **Wazuh manager** ingests both the target's host/web logs and Suricata's
-   `eve.json`, runs decoders, then the rule engine (shipped rules + our
-   `local_rules.xml`), and writes matches to `alerts.json`.
-4. `alert_forwarder.py` reads `alerts.json`, keeps level ≥ N, and POSTs a
-   formatted message to a chat webhook.
+1. **Schema-Enforced Normalization:** Ingestion of Linux authentication logs, web access logs, and network alerts into canonical, typed event data structures.
+2. **Stateful Event Correlation:** Identifying multi-stage attack tradecraft (such as brute force transitioning to valid account authentication) across configurable sliding time windows.
+3. **Transparent Risk Scoring:** A mathematical multi-factor scoring algorithm that provides analysts with clear component breakdowns rather than opaque numbers.
+4. **Offline Replay & Benchmarking:** A zero-dependency CLI runner that deterministically processes telemetry and benchmarks detection precision and recall against labeled datasets.
 
-## Why correlation rules matter
+---
 
-A single failed SSH login is noise. The value is in **stateful correlation**:
+## 2. End-to-End Processing Pipeline
 
-- `100100` fires only when one source IP causes **8 failures in 120 s**.
-- `100101` is the money rule — a **successful** login from an IP that just
-  tripped `100100`. That sequence is what separates "someone's knocking" from
-  "someone's in". Sigma can't express this stateful chain on its own, which is
-  exactly why both Sigma (portable, static) and Wazuh rules (stateful) are here.
+```mermaid
+flowchart TD
+    subgraph Ingestion["1. Telemetry Ingestion"]
+        auth["Linux auth.log\n(Syslog RFC 3164)"] --> p_auth["AuthLogParser"]
+        web["Apache / Nginx\n(Combined Access)"] --> p_web["ApacheLogParser"]
+        eve["Suricata IDS\n(eve.json)"] --> p_eve["SuricataEveParser"]
+        wazuh["Wazuh Manager\n(alerts.json)"] --> p_wazuh["WazuhAlertsParser"]
+    end
 
-## Detection coverage matrix
+    subgraph Normalization["2. Normalization Engine"]
+        p_auth --> norm["EventNormalizer\n• Timezone: UTC ISO-8601\n• Category: EventType Enum\n• Clean IP / Ports / Users"]
+        p_web --> norm
+        p_eve --> norm
+        p_wazuh --> norm
+        norm --> event_stream["engine.models.Event Stream"]
+    end
 
-| ATT&CK | Sigma | Wazuh | Suricata |
-|--------|:-----:|:-----:|:--------:|
-| T1110.001 Brute force | ✅ | ✅ 100100 | ✅ 1000002 |
-| T1078 Valid accounts | — | ✅ 100101 | — |
-| T1059.004 Unix shell | ✅ | ✅ 100110 | — |
-| T1105 Ingress tool transfer | ✅ | — | ✅ 1000005 |
-| T1190 Exploit public app | ✅ | ✅ 100120 | ✅ 1000003 |
-| Recon / port scan | — | — | ✅ 1000001 |
-| Path traversal | — | — | ✅ 1000004 |
+    subgraph Detection["3. Detection Engine"]
+        event_stream --> det["DetectionEngine"]
+        rules["Rule Catalog\n• DET-SSH-001 (Brute Force)\n• DET-WEB-001 (SQL Injection)\n• DET-WEB-002 (Path Traversal)"] --> det
+        det --> alerts["engine.models.Alert Stream"]
+    end
 
-## Adding the indexer + dashboard (optional)
+    subgraph Correlation["4. Correlation & Deduplication"]
+        alerts --> corr["EventCorrelator\n• Sliding Time Window\n• Sequence Escalation"]
+        alerts --> dedup["AlertDeduplicator\n• Suppression Window\n• Benign Allowlist"]
+        corr --> inc["engine.models.Incident Aggregator"]
+    end
 
-```bash
-# 1. Generate certs (one-time)
-docker run --rm -v "$PWD/config/certs:/certs" \
-  wazuh/wazuh-certs-tool:0.0.2 -A
+    subgraph Analytics["5. Risk Scoring & ATT&CK"]
+        inc --> scorer["RiskScorer\nScore = Base * Conf + Freq + Seq + Exp"]
+        inc --> mitre["MITREMatrix\nTechnique Validation & Coverage"]
+    end
 
-# 2. Add wazuh.indexer and wazuh.dashboard services pinned to 4.9.0,
-#    mounting ./config/certs, then `docker compose up -d`.
+    subgraph Reporting["6. Operations & DFIR"]
+        scorer --> rep["IncidentReporter"]
+        mitre --> rep
+        rep --> rep_json["Deterministic JSON Report\n(SHA-256 Evidence Integrity Hash)"]
+        rep --> rep_md["Publication-Grade Markdown Report\n(NIST SP 800-61r2 Playbooks)"]
+    end
 ```
 
-See the upstream `wazuh-docker` single-node example for the full service blocks.
+---
 
-## Hardening notes (for a real deployment)
+## 3. Core Architectural Components
 
-- Replace DVWA with your actual monitored assets and deploy **Wazuh agents**.
-- Terminate the dashboard behind TLS + SSO; never expose `55000` publicly.
-- Ship `alerts.json` to cold storage (S3 + object lock) for retention.
-- Pair with the [secure-aws-landing-zone](https://github.com/CedricCloudOps/secure-aws-landing-zone)
-  repo so the SIEM itself runs on a hardened account.
+### A. Ingestion Layer (`engine/ingestion/`)
+- **`BaseParser` Interface:** All parsers inherit from `BaseParser`, defining `parse_line()` and `parse_stream()`.
+- **Stream Resilience:** When a parser encounters a corrupted line, it logs a `ParseError(line_number, raw_line, error_message)` into an `IngestionResult` rather than aborting stream execution.
+- **Format Parsers:**
+  - `AuthLogParser`: Extracts timestamps, hostnames, PIDs, auth methods, target users, and source IPs from BSD syslog lines.
+  - `ApacheLogParser`: Extracts client IPs, HTTP methods, URIs, query parameters, status codes, user agents, and referers.
+  - `SuricataEveParser`: Parses Suricata EVE JSON objects for alerts, flows, and HTTP transactions.
+  - `WazuhAlertsParser`: Ingests Wazuh manager alert records and rule levels.
+
+### B. Normalization Layer (`engine/normalization/`)
+- **`EventNormalizer`:** Translates format-specific `ParsedRecord` instances into canonical `engine.models.Event` instances.
+- **Timezone Invariant:** Strictly converts all incoming timestamps to timezone-aware UTC datetime objects (`ensure_utc()`).
+- **Semantic Mapping:** Maps disparate log messages to `EventType` enums:
+  - `AUTHENTICATION_FAILURE`
+  - `AUTHENTICATION_SUCCESS`
+  - `WEB_REQUEST`
+  - `NETWORK_ALERT`
+  - `NETWORK_FLOW`
+  - `COMMAND_EXECUTION`
+
+### C. Detection Engine (`engine/detection/`)
+- **`BaseRule`:** Defines rule metadata, MITRE techniques, severity, base score, and confidence.
+- **`DetectionEngine`:** Manages rule registration and stream evaluation.
+- **Built-in Detections:**
+  - `DET-SSH-001`: Threshold-based SSH brute-force detection (configurable threshold and window).
+  - `DET-WEB-001`: SQL injection pattern detection in URI query parameters (decodes URL encoding, inspects tautologies, UNION SELECT, time-based probes).
+  - `DET-WEB-002`: Directory traversal pattern detection (`../`, encoded dots, `/etc/passwd`).
+
+### D. Stateful Correlation (`engine/correlation/`)
+- **Sliding Time Windows:** Tracks event histories per `source_ip` across sliding windows (e.g., 120s–180s).
+- **Sequence Escalation:** When a successful login occurs from an IP address that tripped `DET-SSH-001` within the correlation window, the correlator generates a `CRITICAL` incident (`INC-SSH-...`) representing probable account compromise (mapping `T1110.001` and `T1078`).
+- **Incident Aggregation:** Groups related alerts from the same source into a unified incident, maintaining an ordered chronological evidence timeline.
+
+### E. Risk Scoring Model (`engine/scoring/`)
+- **Formula:**
+  $$\text{Score} = \min\left(100.0, (\text{Base} \times (0.6 + 0.4 \times \text{Confidence})) + \text{FreqBoost} + \text{SequenceBoost} + \text{ExposureBoost}\right)$$
+- **Factor Transparency:** Prevents black-box scores by returning a dictionary of factor weights and an auditable rationale string.
+- **Anti-Double-Counting:** Dampens frequency increases logarithmically to avoid infinite runaway scores.
+
+### F. Alert Deduplication & False-Positive Management (`engine/suppression/`)
+- **`AlertDeduplicator`:** Suppresses repeated identical alerts matching `(rule_id, source_ip, target_host)` within a configurable suppression window (e.g., 60s).
+- **Allowlisting:** Filters trusted IP addresses (such as `127.0.0.1` health checks) and service accounts (such as `backup_svc`) with explicit recorded reasons.
+
+### G. Reporting & DFIR Integrity (`engine/reporting/`)
+- **`IncidentReporter`:** Outputs deterministic JSON and Markdown reports.
+- **Evidence Integrity:** Computes a SHA-256 digest over concatenated raw logs in chronological sequence, establishing forensic evidence verification.
+- **NIST Alignment:** Generates containment, eradication, and recovery recommendations aligned with NIST SP 800-61r2.

@@ -11,6 +11,7 @@ venv/
 
 # Lab data / logs
 *.log
+!tests/fixtures/*.log
 eve.json
 alerts.json
 

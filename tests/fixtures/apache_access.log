@@ -1,0 +1,8 @@
+192.0.2.15 - - [08/Oct/2026:14:00:10 +0000] "GET /vulnerabilities/sqli/?id=1%27+UNION+SELECT+null%2Cuser%2Cpassword+FROM+users--+- HTTP/1.1" 200 4812 "http://dvwa.lab/vulnerabilities/sqli/" "sqlmap/1.7#stable"
+192.0.2.15 - - [08/Oct/2026:14:00:15 +0000] "GET /vulnerabilities/sqli/?id=1%27+OR+%271%27%3D%271 HTTP/1.1" 200 4520 "-" "Mozilla/5.0 (X11; Linux x86_64)"
+192.0.2.15 - - [08/Oct/2026:14:00:20 +0000] "GET /vulnerabilities/sqli/?id=1%3B+SELECT+sleep(5) HTTP/1.1" 200 120 "-" "Mozilla/5.0 (X11; Linux x86_64)"
+192.0.2.15 - - [08/Oct/2026:14:01:00 +0000] "GET /../../../../etc/passwd HTTP/1.1" 404 280 "-" "curl/7.88.1"
+198.51.100.50 - - [08/Oct/2026:14:05:00 +0000] "GET /index.php HTTP/1.1" 200 3240 "https://example.org/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+198.51.100.50 - - [08/Oct/2026:14:05:02 +0000] "GET /search?q=credit+union+selection HTTP/1.1" 200 2150 "https://example.org/search" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+198.51.100.50 - - [08/Oct/2026:14:05:15 +0000] "GET /assets/style.css HTTP/1.1" 200 1024 "https://example.org/index.php" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+127.0.0.1 - - [08/Oct/2026:14:05:30 +0000] "GET /health HTTP/1.1" 200 45 "-" "curl/7.88.1"

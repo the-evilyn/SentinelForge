@@ -1,0 +1,240 @@
+[
+  {
+    "scenario_id": "SCEN-SSH-001",
+    "scenario_name": "SSH Brute Force with Compromise",
+    "classification": "malicious",
+    "description": "8 rapid failed SSH logins from single source IP followed by 1 successful login for account deploy.",
+    "source_ip": "192.0.2.15",
+    "target_host": "web-01",
+    "expected_alert_rules": ["DET-SSH-001", "DET-SSH-002"],
+    "events": [
+      {
+        "event_id": "evt-ssh-01",
+        "timestamp": "2026-10-08T14:00:01Z",
+        "event_type": "authentication_failure",
+        "source_ip": "192.0.2.15",
+        "source_port": 42101,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "admin",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_failed",
+        "raw_log": "Failed password for invalid user admin from 192.0.2.15 port 42101 ssh2"
+      },
+      {
+        "event_id": "evt-ssh-02",
+        "timestamp": "2026-10-08T14:00:05Z",
+        "event_type": "authentication_failure",
+        "source_ip": "192.0.2.15",
+        "source_port": 42102,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "root",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_failed",
+        "raw_log": "Failed password for invalid user root from 192.0.2.15 port 42102 ssh2"
+      },
+      {
+        "event_id": "evt-ssh-03",
+        "timestamp": "2026-10-08T14:00:10Z",
+        "event_type": "authentication_failure",
+        "source_ip": "192.0.2.15",
+        "source_port": 42103,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "test",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_failed",
+        "raw_log": "Failed password for invalid user test from 192.0.2.15 port 42103 ssh2"
+      },
+      {
+        "event_id": "evt-ssh-04",
+        "timestamp": "2026-10-08T14:00:14Z",
+        "event_type": "authentication_failure",
+        "source_ip": "192.0.2.15",
+        "source_port": 42104,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "ubuntu",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_failed",
+        "raw_log": "Failed password for invalid user ubuntu from 192.0.2.15 port 42104 ssh2"
+      },
+      {
+        "event_id": "evt-ssh-05",
+        "timestamp": "2026-10-08T14:00:18Z",
+        "event_type": "authentication_failure",
+        "source_ip": "192.0.2.15",
+        "source_port": 42105,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "oracle",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_failed",
+        "raw_log": "Failed password for invalid user oracle from 192.0.2.15 port 42105 ssh2"
+      },
+      {
+        "event_id": "evt-ssh-06",
+        "timestamp": "2026-10-08T14:00:23Z",
+        "event_type": "authentication_failure",
+        "source_ip": "192.0.2.15",
+        "source_port": 42106,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "guest",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_failed",
+        "raw_log": "Failed password for invalid user guest from 192.0.2.15 port 42106 ssh2"
+      },
+      {
+        "event_id": "evt-ssh-07",
+        "timestamp": "2026-10-08T14:00:28Z",
+        "event_type": "authentication_failure",
+        "source_ip": "192.0.2.15",
+        "source_port": 42107,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "git",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_failed",
+        "raw_log": "Failed password for invalid user git from 192.0.2.15 port 42107 ssh2"
+      },
+      {
+        "event_id": "evt-ssh-08",
+        "timestamp": "2026-10-08T14:00:32Z",
+        "event_type": "authentication_failure",
+        "source_ip": "192.0.2.15",
+        "source_port": 42108,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "deploy",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_failed",
+        "raw_log": "Failed password for deploy from 192.0.2.15 port 42108 ssh2"
+      },
+      {
+        "event_id": "evt-ssh-09",
+        "timestamp": "2026-10-08T14:00:45Z",
+        "event_type": "authentication_success",
+        "source_ip": "192.0.2.15",
+        "source_port": 42110,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "deploy",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_success",
+        "raw_log": "Accepted password for deploy from 192.0.2.15 port 42110 ssh2"
+      }
+    ]
+  },
+  {
+    "scenario_id": "SCEN-SSH-002",
+    "scenario_name": "Benign SSH Password Typo",
+    "classification": "benign",
+    "description": "Authorized user mistypes password once, then immediately logs in successfully.",
+    "source_ip": "198.51.100.50",
+    "target_host": "web-01",
+    "expected_alert_rules": [],
+    "events": [
+      {
+        "event_id": "evt-ssh-typo-01",
+        "timestamp": "2026-10-08T14:02:10Z",
+        "event_type": "authentication_failure",
+        "source_ip": "198.51.100.50",
+        "source_port": 50212,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "alice_analyst",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_failed",
+        "raw_log": "Failed password for alice_analyst from 198.51.100.50 port 50212 ssh2"
+      },
+      {
+        "event_id": "evt-ssh-typo-02",
+        "timestamp": "2026-10-08T14:02:16Z",
+        "event_type": "authentication_success",
+        "source_ip": "198.51.100.50",
+        "source_port": 50214,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 22,
+        "user": "alice_analyst",
+        "host": "web-01",
+        "service": "sshd",
+        "action": "login_success",
+        "raw_log": "Accepted password for alice_analyst from 198.51.100.50 port 50214 ssh2"
+      }
+    ]
+  },
+  {
+    "scenario_id": "SCEN-WEB-001",
+    "scenario_name": "Web SQL Injection Probe",
+    "classification": "malicious",
+    "description": "SQL injection payloads passed in HTTP GET query string.",
+    "source_ip": "192.0.2.15",
+    "target_host": "dvwa.lab",
+    "expected_alert_rules": ["DET-WEB-001"],
+    "events": [
+      {
+        "event_id": "evt-web-sqli-01",
+        "timestamp": "2026-10-08T14:00:10Z",
+        "event_type": "web_request",
+        "source_ip": "192.0.2.15",
+        "source_port": 51200,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 80,
+        "user": null,
+        "host": "dvwa.lab",
+        "service": "apache",
+        "action": "http_get",
+        "raw_log": "192.0.2.15 - - [08/Oct/2026:14:00:10 +0000] \"GET /vulnerabilities/sqli/?id=1%27+UNION+SELECT+null%2Cuser%2Cpassword+FROM+users--+- HTTP/1.1\" 200 4812 \"http://dvwa.lab/vulnerabilities/sqli/\" \"sqlmap/1.7#stable\"",
+        "metadata": {
+          "uri": "/vulnerabilities/sqli/?id=1'+UNION+SELECT+null,user,password+FROM+users--+-",
+          "method": "GET",
+          "status_code": 200,
+          "user_agent": "sqlmap/1.7#stable"
+        }
+      }
+    ]
+  },
+  {
+    "scenario_id": "SCEN-WEB-002",
+    "scenario_name": "Benign Web Search Query (False Positive Resistance)",
+    "classification": "benign",
+    "description": "Legitimate search containing English words 'union' and 'selection' that should not trip naive SQLi detectors.",
+    "source_ip": "198.51.100.50",
+    "target_host": "example.org",
+    "expected_alert_rules": [],
+    "events": [
+      {
+        "event_id": "evt-web-benign-01",
+        "timestamp": "2026-10-08T14:05:02Z",
+        "event_type": "web_request",
+        "source_ip": "198.51.100.50",
+        "source_port": 54321,
+        "destination_ip": "10.0.0.5",
+        "destination_port": 80,
+        "user": null,
+        "host": "example.org",
+        "service": "apache",
+        "action": "http_get",
+        "raw_log": "198.51.100.50 - - [08/Oct/2026:14:05:02 +0000] \"GET /search?q=credit+union+selection HTTP/1.1\" 200 2150 \"https://example.org/search\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64)\"",
+        "metadata": {
+          "uri": "/search?q=credit+union+selection",
+          "method": "GET",
+          "status_code": 200,
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
+      }
+    ]
+  }
+]

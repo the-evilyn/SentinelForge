@@ -19,15 +19,16 @@ services:
       memlock: { soft: -1, hard: -1 }
       nofile: { soft: 655360, hard: 655360 }
     ports:
-      - "1514:1514" # agent connection (TCP)
-      - "1515:1515" # agent enrollment
-      - "55000:55000" # Wazuh REST API
+      - "127.0.0.1:1514:1514" # agent connection (TCP) - localhost only
+      - "127.0.0.1:1515:1515" # agent enrollment - localhost only
+      - "127.0.0.1:55000:55000" # Wazuh REST API - localhost only
     volumes:
       - wazuh_etc:/var/ossec/etc
       - wazuh_logs:/var/ossec/logs
       - ./config/wazuh/local_rules.xml:/var/ossec/etc/rules/local_rules.xml:ro
       - ./config/wazuh/local_decoder.xml:/var/ossec/etc/decoders/local_decoder.xml:ro
       - suricata_logs:/var/log/suricata:ro # so the manager can ingest eve.json
+      - dvwa_logs:/var/log/apache2:ro # bridge access logs from DVWA target
     healthcheck:
       test: ["CMD", "/var/ossec/bin/wazuh-control", "status"]
       interval: 30s
@@ -54,7 +55,9 @@ services:
     hostname: dvwa
     restart: unless-stopped
     ports:
-      - "8080:80" # http://localhost:8080  (login admin/password)
+      - "127.0.0.1:8080:80" # http://127.0.0.1:8080 - localhost only (login admin/password)
+    volumes:
+      - dvwa_logs:/var/log/apache2 # bridge access logs to wazuh.manager
     environment:
       - MYSQL_PASS=${DVWA_DB_PASSWORD:-changeme}
 
@@ -62,3 +65,4 @@ volumes:
   wazuh_etc:
   wazuh_logs:
   suricata_logs:
+  dvwa_logs:

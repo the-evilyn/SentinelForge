@@ -1,0 +1,14 @@
+Oct 08 14:00:01 web-01 sshd[28101]: Failed password for invalid user admin from 192.0.2.15 port 42101 ssh2
+Oct 08 14:00:05 web-01 sshd[28102]: Failed password for invalid user root from 192.0.2.15 port 42102 ssh2
+Oct 08 14:00:10 web-01 sshd[28103]: Failed password for invalid user test from 192.0.2.15 port 42103 ssh2
+Oct 08 14:00:14 web-01 sshd[28104]: Failed password for invalid user ubuntu from 192.0.2.15 port 42104 ssh2
+Oct 08 14:00:18 web-01 sshd[28105]: Failed password for invalid user oracle from 192.0.2.15 port 42105 ssh2
+Oct 08 14:00:23 web-01 sshd[28106]: Failed password for invalid user guest from 192.0.2.15 port 42106 ssh2
+Oct 08 14:00:28 web-01 sshd[28107]: Failed password for invalid user git from 192.0.2.15 port 42107 ssh2
+Oct 08 14:00:32 web-01 sshd[28108]: Failed password for deploy from 192.0.2.15 port 42108 ssh2
+Oct 08 14:00:45 web-01 sshd[28115]: Accepted password for deploy from 192.0.2.15 port 42110 ssh2
+Oct 08 14:02:10 web-01 sshd[28120]: Failed password for alice_analyst from 198.51.100.50 port 50212 ssh2
+Oct 08 14:02:16 web-01 sshd[28121]: Accepted password for alice_analyst from 198.51.100.50 port 50214 ssh2
+Oct 08 14:05:00 web-01 sshd[28130]: Accepted publickey for backup_svc from 198.51.100.75 port 51234 ssh2: RSA SHA256:sanitized_dummy_fingerprint
+Oct 08 14:10:00 web-01 sshd[28140]: Failed password for guest from 203.0.113.88 port 39120 ssh2
+Oct 08 14:18:00 web-01 sshd[28145]: Failed password for guest from 203.0.113.88 port 39122 ssh2
